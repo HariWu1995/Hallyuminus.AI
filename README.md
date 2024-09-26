@@ -1,6 +1,7 @@
 # Hallyuminus.AI
 
 [Illuminus.ai] Dialogue System for screenwriting K-drama.
+
 --------------------------
 ## To-Do List
 
@@ -14,6 +15,8 @@
 
 - [ ] Voice Dialogue (T2S, S2T)
 - [ ] LoRA as **Character** and **Context** Adaptation
+--------------------------
+## Dataset
 --------------------------
 ## User Guide
 
