@@ -17,11 +17,15 @@
 ## Future Improvements
 
 - [ ] Voice Dialogue (T2S, S2T)
-- [ ] LoRA as **Character** and **Context** Adaptation
+- [ ] Train **LoRA** as **Character** and **Context** Adaptation
+- [ ] Finetune **LLM** for customized tasks
+
 --------------------------
 ## Dataset
+
 --------------------------
 ## User Guide
+
 --------------------------
 ## References
 [Story Generation](https://github.com/yingpengma/Awesome-Story-Generation)
