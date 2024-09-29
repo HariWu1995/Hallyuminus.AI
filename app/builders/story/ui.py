@@ -3,6 +3,7 @@ import gradio as gr
 
 
 all_models = ['LLaMA','KoGPT']
+default_model = 'LLaMA'
 
 
 def _generate_story(seed_words=None, themes=None, 
@@ -33,7 +34,7 @@ def create_ui(all_themes: list = ['superhero'], min_width: int = 25):
                 kwords = gr.Textbox(label="Seeding Words", placeholder="Enter some seeding words ...")
 
             with gr.Column(scale=1, variant='panel', min_width=min_width):
-                model = gr.Dropdown(label="Model", choices=all_models, value='LLaMA', multiselect=False)
+                model = gr.Dropdown(label="Model", choices=all_models, value=default_model, multiselect=False)
                 button = gr.Button(value="Generate")
 
             with gr.Column(scale=4, variant='panel', min_width=min_width):

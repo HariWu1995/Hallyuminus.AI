@@ -5,8 +5,8 @@ from huggingface_hub import hf_hub_download
 
 
 ## Download the GGUF model
-# model_name = "tohur/natsumura-storytelling-rp-1.0-llama-3.1-8b-GGUF"
-# model_file = "natsumura-storytelling-rp-1.0-llama-3.1-8B.Q2_K.gguf"
+# model_name = "TheBloke/Mixtral-8x7B-Instruct-v0.1-GGUF"
+# model_file = "mixtral-8x7b-instruct-v0.1.Q4_K_M.gguf" # this is the specific model file we'll use in this example. It's a 4-bit quant, but other levels of quantization are available in the model repo if preferred
 # model_path = hf_hub_download(model_name, filename=model_file)
 
 CHECKPOINT = "./checkpoints/natsumura-storytelling-rp-1.0/llama-3.1-8B.Q2_K.gguf"

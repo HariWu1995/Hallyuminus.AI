@@ -5,10 +5,9 @@
 ## To-Do List
 
 - [x] GUI
-- [ ] **Character** Builder
-- [ ] **Relation** Builder
+- [x] **Character** Builder
+- [x] **Relation** Builder
 - [ ] **Context** Builder
-- [ ] **Memory** Builder
 - [ ] **Memory** Manager
 - [ ] **Emotion** Manager
 - [ ] **Dialogue** Manager

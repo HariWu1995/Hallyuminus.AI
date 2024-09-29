@@ -1,5 +1,5 @@
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM as AutoGenerativeModel
+from transformers import AutoTokenizer, AutoModelForCausalLM as GenerativeModel
 
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -8,10 +8,10 @@ CHECKPOINT_DIR = "./checkpoints/kogpt"
 
 def load_model(checkpoint_dir: str = CHECKPOINT_DIR):
     tokenizer = AutoTokenizer.from_pretrained(checkpoint_dir,)
-    model = AutoGenerativeModel.from_pretrained(checkpoint_dir,    
-                                                pad_token_id=tokenizer.eos_token_id,
-                                                torch_dtype='auto', low_cpu_mem_usage=True
-                                                ).to(device=DEVICE, non_blocking=True)
+    model = GenerativeModel.from_pretrained(checkpoint_dir,    
+                                            pad_token_id=tokenizer.eos_token_id,
+                                            torch_dtype='auto', low_cpu_mem_usage=True
+                                            ).to(device=DEVICE, non_blocking=True)
     model.eval()
 
     return tokenizer, model

@@ -1,4 +1,11 @@
+import gradio as gr
+
+
 # Define styles
+min_width = 25
+main_theme = gr.themes.Soft(primary_hue=gr.themes.colors.red, 
+                          secondary_hue=gr.themes.colors.pink,)
+
 css = """
 .gradio-container {width: 95% !important}
 """
@@ -10,10 +17,4 @@ title = r"""
 
 description = r"""
 <b>Gradio demo</b> for <a href='https://github.com/HariWu1995/Hallyuminus.AI' target='_blank'><b> Hallyuminus.AI </b></a>.<br>
-"""
-
-tips = r"""
-### Usage tips
-1. If you're not satisfied, ..."
-2. If you feel that ...
 """
