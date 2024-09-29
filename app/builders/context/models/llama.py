@@ -3,10 +3,12 @@ from copy import deepcopy
 from llama_cpp import Llama
 from huggingface_hub import hf_hub_download
 
+from app.utils import debug_llm
+
 
 ## Download the GGUF model
-# model_name = "TheBloke/Mixtral-8x7B-Instruct-v0.1-GGUF"
-# model_file = "mixtral-8x7b-instruct-v0.1.Q4_K_M.gguf" # this is the specific model file we'll use in this example. It's a 4-bit quant, but other levels of quantization are available in the model repo if preferred
+# model_name = "tohur/natsumura-storytelling-rp-1.0-llama-3.1-8b-GGUF"
+# model_file = "natsumura-storytelling-rp-1.0-llama-3.1-8B.Q2_K.gguf"
 # model_path = hf_hub_download(model_name, filename=model_file)
 
 CHECKPOINT = "./checkpoints/natsumura-storytelling-rp-1.0/llama-3.1-8B.Q2_K.gguf"
@@ -21,11 +23,14 @@ generation_kwargs = {
             "stop" : ["</s>"],
             "echo" : False,    # Echo the prompt in the output
            "top_k" : 1,        # This is essentially greedy decoding, since the model will always return the highest-probability token. Set this value > 1 for sampling decoding
+     "temperature" : 0.49,
+  "repeat-penalty" : 1.95,
 }
 
 generation_template = [
     {
         "role": "system", 
+        # "content": "You are a literature analyst.",
         "content": "You are a storyteller.",
     },
     {
@@ -46,62 +51,70 @@ def load_model(checkpoint: str = CHECKPOINT, max_tokens: int = 1_000):
     return llm
 
 
-def generate_story( seed_words: str or list = None, 
-                        themes: str or list = None, **kwargs):
+def build_temporal_context(story: str, llm: Llama, **kwargs):
+
+    ## Prompt Engineering
+    prompt  = "Determine the story background in terms of time. "
+    prompt += "Imagine current affairs happening, including international, national, and local if any. "
+    prompt += "List the affairs with bullet point. "
+    prompt += "Do not focus on personal affairs of any character. "
+    prompt += "Remember to keep the answer short and brief while informative. "
+
+    template = deepcopy(generation_template)
+    template[0]['content'] += f" You are reading this story: {story}"
+    template[1]['content'] = prompt
+    
+    ## Generation
+    response = llm.create_chat_completion(messages=template)
+    response = response["choices"][0]["message"]["content"]
+
+    if kwargs.get('verbose', False):
+        debug_llm(prompt, response)
+
+    return response
+
+
+def build_locational_context(story: str, llm: Llama, **kwargs):
+
+    ## Prompt Engineering
+    prompt  = "Determine the story background in terms of location. "
+    prompt += "Describe the house (or department) and neighborhood where the characters live and work. "
+    prompt += "Focus on the specialities and uniqueness about their lives. "
+    prompt += "Remember to keep the answer brief while informative. "
+
+    template = deepcopy(generation_template)
+    template[0]['content'] += f" You are reading this story: {story}"
+    template[1]['content'] = prompt
+    
+    ## Generation
+    response = llm.create_chat_completion(messages=template)
+    response = response["choices"][0]["message"]["content"]
+
+    if kwargs.get('verbose', False):
+        debug_llm(prompt, response)
+
+    return response
+
+
+def build_contextual_background(story: str, **kwargs):
 
     max_tokens = kwargs.get('max_tokens', 1_024)
 
     ## Instantiate model
     llm = load_model(max_tokens=max_tokens)
 
-    ## Prompt Engineering
-    prompt = f"Tell me a brief story. "
-    
-    if themes is not None:
-        if isinstance(themes, str):
-            themes = [themes]
-    else:
-        themes = []
+    ## Build context
+    temporal_context = build_temporal_context(story, llm, **kwargs)
+    location_context = build_locational_context(story, llm, **kwargs)
 
-    if seed_words is not None:
-        if isinstance(seed_words, str):
-            seed_words = [seed_words]
-    else:
-        seed_words = []
-    seed_words = [w for w in seed_words if w != '']
-    seed_words.extend(themes)
-
-    if len(seed_words) > 0:
-        seed_words = ', '.join(seed_words)
-        prompt += f'A story about {seed_words}. '
-
-    print('\n'*3)
-    print(prompt)
-    print('-'*11)
-    
-    ## Generation
-    template = deepcopy(generation_template)
-    template[-1]['content'] = prompt
-    response = llm.create_chat_completion(messages=template)
-    # response = llm(prompt, **generation_kwargs)
-
-    print('\n'*3)
-    try:
-        # response = response["choices"][0]["text"]
-        response = response["choices"][0]["message"]["content"]
-    except Exception:
-        pass
-
-    print(response)
-    return response
+    return temporal_context, location_context
 
 
 if __name__ == "__main__":
 
-    generate_story(
-            # themes = ['Power and Corruption','Social Inequality and Justice'],
-            themes = ['Betrayal','Revenge'],
-        seed_words = ['rabbit','turtle','race'],
-    )
+    with open('./tests/Like-Father-Like-Son/abstract.txt', 'r') as file_reader:
+        story = file_reader.read()
+
+    context = build_contextual_background(story, verbose=True)
     
 

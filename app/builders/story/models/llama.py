@@ -3,6 +3,8 @@ from copy import deepcopy
 from llama_cpp import Llama
 from huggingface_hub import hf_hub_download
 
+from app.utils import debug_llm
+
 
 ## Download the GGUF model
 # model_name = "tohur/natsumura-storytelling-rp-1.0-llama-3.1-8b-GGUF"
@@ -21,6 +23,8 @@ generation_kwargs = {
             "stop" : ["</s>"],
             "echo" : False,    # Echo the prompt in the output
            "top_k" : 1,        # This is essentially greedy decoding, since the model will always return the highest-probability token. Set this value > 1 for sampling decoding
+  #    "temperature" : 0.19,
+  # "repeat-penalty" : 1.95,
 }
 
 generation_template = [
@@ -75,24 +79,16 @@ def generate_story( seed_words: str or list = None,
         seed_words = ', '.join(seed_words)
         prompt += f'A story about {seed_words}. '
 
-    print('\n'*3)
-    print(prompt)
-    print('-'*11)
-    
-    ## Generation
     template = deepcopy(generation_template)
     template[-1]['content'] = prompt
+    
+    ## Generation
     response = llm.create_chat_completion(messages=template)
-    # response = llm(prompt, **generation_kwargs)
+    response = response["choices"][0]["message"]["content"]
 
-    print('\n'*3)
-    try:
-        # response = response["choices"][0]["text"]
-        response = response["choices"][0]["message"]["content"]
-    except Exception:
-        pass
+    if kwargs.get('verbose', False):
+        debug_llm(prompt, response)
 
-    print(response)
     return response
 
 

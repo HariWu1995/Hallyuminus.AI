@@ -11,6 +11,7 @@
 - [ ] **Memory** Manager
 - [ ] **Emotion** Manager
 - [ ] **Dialogue** Manager
+- [ ] **Language** Manager
 
 --------------------------
 ## Future Improvements
