@@ -7,7 +7,7 @@
 - [x] GUI
 - [x] **Character** Builder
 - [x] **Relation** Builder
-- [ ] **Context** Builder
+- [x] **Context** Builder
 - [ ] **Memory** Manager
 - [ ] **Emotion** Manager
 - [ ] **Dialogue** Manager
