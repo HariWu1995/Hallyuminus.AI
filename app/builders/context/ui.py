@@ -44,16 +44,15 @@ def create_ui(min_width: int = 25):
                 place_ctx = gr.Textbox(label="Place", interactive=True, max_lines=10)
 
         with gr.Row():
-
             with gr.Column(scale=1, variant='panel', min_width=min_width):
-                fw_button = gr.Button(value="Forward")
-
-            with gr.Column(scale=5, variant='panel', min_width=min_width):
+                fw_button = gr.Button(value='Send to Dialogue')
+            with gr.Column(scale=3, variant='panel', min_width=min_width):
                 gr.Markdown('')
 
         # Functionality
         run_button.click(fn=_build_context, inputs=[story, model], 
                                             outputs=[time_ctx, place_ctx])
+
     return gui, story, \
             (time_ctx, place_ctx, fw_button)
 

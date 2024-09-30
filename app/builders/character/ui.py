@@ -2,19 +2,11 @@ import os
 import gradio as gr
 import pandas as pd
 
-from app.utils import filter_table, human_feedback
+from .utils import select_character_and_events as build_character, human_feedback
 
 
 all_models = ['LLaMA']
 default_model = 'LLaMA'
-
-
-def filter_char(df: pd.DataFrame, options: str or list = 'all', column: str = 'character'):
-    return filter_table(df=df, options=options, column=column)
-
-
-def filter_event(df: pd.DataFrame, options: str or list = 'all', column: str = 'subjects'):
-    return filter_table(df=df, options=options, column=column)
 
 
 def _build_characters(story: str, model: str = 'LLaMA', progress=gr.Progress()):
@@ -48,18 +40,19 @@ def _build_characters(story: str, model: str = 'LLaMA', progress=gr.Progress()):
     all_characters_events = all_characters_events[['subjects','event_type','event']]
 
     # Add feedback-column
-    all_characters_values = pd.concat([pd.DataFrame(columns=['feedback'], data=[1]*len(all_characters_values)), all_characters_values], axis=1)
-    all_characters_events = pd.concat([pd.DataFrame(columns=['feedback'], data=[1]*len(all_characters_events)), all_characters_events], axis=1)
-    key_events            = pd.concat([pd.DataFrame(columns=['feedback'], data=[1]*len(           key_events)),            key_events], axis=1)
+    all_characters_values = pd.concat([pd.DataFrame(columns=['approval'], data=[1]*len(all_characters_values)), all_characters_values], axis=1)
+    all_characters_events = pd.concat([pd.DataFrame(columns=['approval'], data=[1]*len(all_characters_events)), all_characters_events], axis=1)
+    key_events            = pd.concat([pd.DataFrame(columns=['approval'], data=[1]*len(           key_events)),            key_events], axis=1)
 
-    return all_characters, all_characters_values, \
-          all_char_groups, all_characters_events, key_events
+    return all_characters_values, \
+            all_characters_events, key_events
 
 
 def create_ui(min_width: int = 25):
 
-    filter_style = dict(size='sm', variant='secondary')
-    
+    filter_style = dict(size='sm', variant='secondary', interactive=True)
+    table_kwargs = dict(wrap=True, datatype="markdown", interactive=False, line_breaks=True)
+
     with gr.Blocks(css=None, analytics_enabled=False) as gui:
 
         with gr.Row():
@@ -69,50 +62,78 @@ def create_ui(min_width: int = 25):
 
             with gr.Column(scale=1, variant='panel', min_width=min_width):
                 model = gr.Dropdown(label="Model", choices=all_models, value=default_model, multiselect=False)
-                run_button = gr.Button(value="Process")
+                run_bttn = gr.Button(value="Process")
 
+        ## Key Information Extraction
         gr.Markdown("### 🔐 Key Events")
-        with gr.Row():    
-            key_events = gr.Dataframe(datatype="markdown", line_breaks=True, interactive=True, wrap=True)
+        key_events = gr.Dataframe(**table_kwargs)
 
-        gr.Markdown("### 🪪 Character Info")
         with gr.Row():
             with gr.Column(scale=2, variant='panel', min_width=min_width):
-                char_opt = gr.Dropdown(choices=[], label="Select Character", interactive=False, visible=False, multiselect=True, allow_custom_value=True)
+                gr.Markdown("### 🪪 All Characteristics")
+                characters = gr.Dataframe(column_widths=['10%','15%','75%'], **table_kwargs)
 
-            with gr.Column(scale=1, variant='panel', min_width=min_width):
-                char_fltr = gr.Button(value="Filter", interactive=False, visible=False, **filter_style)
+            with gr.Column(scale=5, variant='panel', min_width=min_width):
+                gr.Markdown("### 📼 All Events (Memory)")
+                events = gr.Dataframe(column_widths=['10%','12%','13%','65%'], **table_kwargs)
 
-        with gr.Row():
-            characteristics = gr.Dataframe(datatype="markdown", line_breaks=True, interactive=True, wrap=True)
+        ## Characters Builder
+        table_kwargs['interactive'] = True
 
-        gr.Markdown("### 📼 Memory Info")
+        gr.Markdown("### 👥 Character 1")
+
         with gr.Row():
             with gr.Column(scale=2, variant='panel', min_width=min_width):
-                event_opt = gr.Dropdown(choices=[], label="Select Subjects", interactive=False, visible=False, multiselect=True, allow_custom_value=True)
-
+                char1_opt = gr.Textbox(label="Character 1", interactive=True, max_lines=1)
             with gr.Column(scale=1, variant='panel', min_width=min_width):
-                event_fltr = gr.Button(value="Filter", interactive=False, visible=False, **filter_style)
+                char1_bttn = gr.Button(value="Select", **filter_style)
+                char1_ibttn = gr.Button(value="Update", **filter_style)
+            with gr.Column(scale=2, variant='panel', min_width=min_width):
+                gr.Markdown('')
 
         with gr.Row():
-            events = gr.Dataframe(datatype="markdown", line_breaks=True, interactive=True, wrap=True)
+            with gr.Column(scale=1, variant='panel', min_width=min_width):
+                char1_core = gr.Dataframe(column_widths=['12%','88%'], **table_kwargs)
+            with gr.Column(scale=3, variant='panel', min_width=min_width):
+                char1_mem = gr.Dataframe(column_widths=['7%','8%','85%'], **table_kwargs)
+
+        gr.Markdown("### 👥 Character 2")
+
+        with gr.Row():
+            with gr.Column(scale=2, variant='panel', min_width=min_width):
+                char2_opt = gr.Textbox(label="Character 2", interactive=True, max_lines=1)
+            with gr.Column(scale=1, variant='panel', min_width=min_width):
+                char2_bttn = gr.Button(value="Select", **filter_style)
+                char2_ibttn = gr.Button(value="Update", **filter_style)
+            with gr.Column(scale=2, variant='panel', min_width=min_width):
+                gr.Markdown('')
 
         with gr.Row():
             with gr.Column(scale=1, variant='panel', min_width=min_width):
-                fb_button = gr.Button(value="Feedback")
+                char2_core = gr.Dataframe(column_widths=['12%','88%'], **table_kwargs)
+            with gr.Column(scale=3, variant='panel', min_width=min_width):
+                char2_mem = gr.Dataframe(column_widths=['7%','8%','85%'], **table_kwargs)
+
+        ## For sharing
+        with gr.Row():
             with gr.Column(scale=1, variant='panel', min_width=min_width):
-                fw_button = gr.Button(value="Forward")
-            with gr.Column(scale=4, variant='panel', min_width=min_width):
+                fw_button = gr.Button(value='Send to Dialogue')
+            with gr.Column(scale=3, variant='panel', min_width=min_width):
                 gr.Markdown('')
 
         # Functionality
-        run_button.click(fn=_build_characters, inputs=[story, model], outputs=[char_opt, characteristics, event_opt, events, key_events])
-        fb_button.click(fn=human_feedback, inputs=[key_events, characteristics, events], outputs=[key_events, characteristics, events])
+        run_bttn.click(fn=_build_characters, inputs=[story, model], outputs=[characters, events, key_events])
 
-        event_fltr.click(fn=filter_event, inputs=[events, event_opt], outputs=[events])
-        char_fltr.click(fn=filter_char, inputs=[characteristics, char_opt], outputs=[characteristics])
+        char1_bttn.click(fn=build_character, inputs=[characters, events, \
+                                                                 char1_opt], outputs=[char1_core, char1_mem])
+        char1_ibttn.click(fn=human_feedback, inputs=[char1_core, char1_mem], outputs=[char1_core, char1_mem])
+
+        char2_bttn.click(fn=build_character, inputs=[characters, events, \
+                                                                 char2_opt], outputs=[char2_core, char2_mem])
+        char2_ibttn.click(fn=human_feedback, inputs=[char2_core, char2_mem], outputs=[char2_core, char2_mem])
 
     return gui, story, \
-            (char_opt, characteristics, event_opt, events, key_events, fw_button)
+           (char1_opt, char1_core, char1_mem, \
+            char2_opt, char2_core, char2_mem, fw_button)
 
 

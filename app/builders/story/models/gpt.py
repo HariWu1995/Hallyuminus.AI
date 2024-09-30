@@ -1,6 +1,8 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM as GenerativeModel
 
+from app.utils import debug_llm
+
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 CHECKPOINT_DIR = "./checkpoints/kogpt"
@@ -47,18 +49,15 @@ def generate_story( seed_words: str or list = None,
         prompt += f'A story about {seed_words}. '
     # prompt += tokenizer.eos_token
 
-    print('\n'*3)
-    print(prompt)
-    print('-'*11)
-
     ## Generation
     with torch.no_grad():
         tokens = tokenizer.encode(prompt, return_tensors='pt').to(device=DEVICE, non_blocking=True)
         generated = model.generate(tokens, do_sample=False, temperature=0.1905, repetition_penalty=1.9, max_length=max_tokens)
         response = tokenizer.batch_decode(generated)[0]
 
-    print('\n'*3)
-    print(response)
+    if kwargs.get('verbose', False):
+        debug_llm(prompt, response)
+
     return response
 
 
@@ -67,5 +66,6 @@ if __name__ == "__main__":
     generate_story(
             # themes = ['Power and Corruption','Social Inequality and Justice'],
             themes = ['Betrayal','Revenge'],
-        seed_words = ['rabbit','turtle','race'],
+        seed_words = ['rabbit','turtle','race'], 
+           verbose = True,
     )
