@@ -22,10 +22,10 @@
 --------------------------
 ## Future Improvements
 
-- [ ] **Memory** Manager (naïve)
-- [ ] Voice Dialogue (T2S, S2T)
+- [ ] **Emotion**-triggered **Memory** Manager (RAG + Graph)
 - [ ] Train **LoRA** as **Character** and **Context** Adaptation
 - [ ] Finetune **MLM** for customized tasks
+- [ ] Voice Dialogue (T2S, S2T)
 
 --------------------------
 ## Dataset
