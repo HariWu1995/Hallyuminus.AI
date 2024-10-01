@@ -6,6 +6,7 @@
 
 **Note:** 
 - [Character.AI](https://character.ai/) seems very capable of imitating character's characteristics. However, in my experience, it is very easy to manipulate the conversation with the trained bots, so I feel bored in a very short time.
+- [Dialogue Model](https://huggingface.co/microsoft/GODEL-v1_1-base-seq2seq) is NOT capable of responding as a participant in a dialogue. It should be named as **Answering Model**. Hence, the result from these pretrained QnaModel doesn't sound good.
 --------------------------
 ## To-Do List
 
